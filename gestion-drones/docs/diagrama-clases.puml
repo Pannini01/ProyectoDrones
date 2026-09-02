@@ -1,0 +1,118 @@
+@startuml
+skinparam packageStyle rectangle
+skinparam classAttributeIconSize 0
+top to bottom direction
+
+package modelo {
+  abstract class Dron {
+    -id: String
+    -serial: String
+    -modelo: String
+    -fabricante: String
+    -peso: double
+    -piloto: Piloto
+    -sensores: List<Sensor>
+    +getTipo(): TipoDron
+    +clonar(): Dron
+  }
+  class Agricultura {
+    -capacidadTanque: double
+    +clonar(): Agricultura
+  }
+  class Vigilancia {
+    -deteccionTermica: boolean
+    +clonar(): Vigilancia
+  }
+  class Piloto
+  class Sensor
+  class Mision {
+    -fecha: LocalDate
+    -drones: List<Dron>
+  }
+  enum TipoDron
+
+  Dron <|-- Agricultura
+  Dron <|-- Vigilancia
+  Dron "0..*" --> "0..1" Piloto
+  Dron "1" o-- "0..*" Sensor
+  Mision "0..*" o-- "1..*" Dron
+  Dron --> TipoDron
+}
+
+package servicios {
+  interface "Prototipo<T>" as Prototipo {
+    +clonar(): T
+  }
+  interface "DronBuilder<T extends Dron>" as DronBuilder {
+    +reset(): DronBuilder<T>
+    +setId(id: String): DronBuilder<T>
+    +setSerial(serial: String): DronBuilder<T>
+    +setModelo(modelo: String): DronBuilder<T>
+    +setFabricante(fabricante: String): DronBuilder<T>
+    +setPeso(peso: double): DronBuilder<T>
+    +build(): T
+  }
+  class AgriculturaDronBuilder {
+    -dron: Agricultura
+    +setCapacidadTanque(valor: double): AgriculturaDronBuilder
+  }
+  class VigilanciaDronBuilder {
+    -dron: Vigilancia
+    +setDeteccionTermica(valor: boolean): VigilanciaDronBuilder
+  }
+  class "PrototypeRegistry<T extends Prototipo<T>>" as PrototypeRegistry {
+    -cache: Map<String,T>
+    +registrarPrototipo(clave: String, prototipo: T): void
+    +obtenerClon(clave: String): T
+  }
+  abstract class FactoryCreator
+  class CrearAgricultura
+  class CrearVigilancia
+  class PostgresConnection <<Singleton>> {
+    -INSTANCIA: PostgresConnection
+    -PostgresConnection()
+    +getInstance(): PostgresConnection
+    +getConnection(): Connection
+  }
+
+  DronBuilder <|.. AgriculturaDronBuilder
+  DronBuilder <|.. VigilanciaDronBuilder
+  AgriculturaDronBuilder --> Agricultura : construye
+  VigilanciaDronBuilder --> Vigilancia : construye
+  PrototypeRegistry o--> Prototipo : registra y clona
+  FactoryCreator <|-- CrearAgricultura
+  FactoryCreator <|-- CrearVigilancia
+  CrearAgricultura --> Agricultura : crea
+  CrearVigilancia --> Vigilancia : crea
+}
+
+Dron ..|> Prototipo
+
+package dao {
+  interface "Crud<T, ID>" as Crud {
+    +crear(entidad: T): T
+    +buscarPorId(id: ID): Optional<T>
+    +listar(): List<T>
+    +actualizar(entidad: T): boolean
+    +eliminar(id: ID): boolean
+  }
+  class DronDAO
+  Crud <|.. DronDAO : Crud<Dron, String>
+}
+
+' Conexiones directas solicitadas aunque crucen paquetes
+DronDAO --> Dron : mapea y persiste
+DronDAO --> Agricultura : reconstruye
+DronDAO --> Vigilancia : reconstruye
+DronDAO --> PostgresConnection : obtiene Connection
+
+package controlador {
+  class DronController
+}
+
+DronController --> DronDAO : CRUD
+DronController --> AgriculturaDronBuilder : Builder
+DronController --> VigilanciaDronBuilder : Builder
+DronController --> PrototypeRegistry : Prototype
+
+@enduml

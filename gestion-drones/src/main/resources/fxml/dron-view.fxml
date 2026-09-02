@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.proyecto.drones.controlador.DronController">
+    <top>
+        <VBox spacing="4" styleClass="encabezado">
+            <padding><Insets top="18" right="22" bottom="18" left="22"/></padding>
+            <Label text="Gestión de drones" styleClass="titulo"/>
+            <Label text="CRUD PostgreSQL · Builder · Prototype" styleClass="subtitulo"/>
+        </VBox>
+    </top>
+
+    <center>
+        <SplitPane dividerPositions="0.37">
+            <items>
+                <ScrollPane fitToWidth="true" hbarPolicy="NEVER">
+                    <content>
+                        <VBox spacing="14" styleClass="panel-formulario">
+                            <padding><Insets top="18" right="20" bottom="18" left="20"/></padding>
+                            <Label text="Datos del dron" styleClass="seccion"/>
+                            <GridPane hgap="10" vgap="10">
+                                <columnConstraints>
+                                    <ColumnConstraints minWidth="105" halignment="RIGHT"/>
+                                    <ColumnConstraints hgrow="ALWAYS"/>
+                                </columnConstraints>
+                                <children>
+                                    <Label text="ID" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                                    <HBox spacing="6" GridPane.rowIndex="0" GridPane.columnIndex="1">
+                                        <TextField fx:id="txtId" HBox.hgrow="ALWAYS" promptText="UUID"/>
+                                        <Button text="Buscar" onAction="#buscar" styleClass="boton-secundario"/>
+                                    </HBox>
+                                    <Label text="Tipo" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                                    <ComboBox fx:id="cmbTipo" maxWidth="Infinity" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                                    <Label text="Serial" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                                    <TextField fx:id="txtSerial" promptText="Ej. AG-001" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                                    <Label text="Modelo" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                                    <TextField fx:id="txtModelo" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+                                    <Label text="Fabricante" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                                    <TextField fx:id="txtFabricante" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+                                    <Label text="Peso (kg)" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+                                    <TextField fx:id="txtPeso" promptText="Ej. 12.5" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+                                    <Label fx:id="lblCapacidad" text="Tanque (L)" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
+                                    <TextField fx:id="txtCapacidad" promptText="Ej. 24" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+                                    <CheckBox fx:id="chkTermica" text="Incluye detección térmica"
+                                              GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+                                </children>
+                            </GridPane>
+
+                            <FlowPane hgap="8" vgap="8">
+                                <Button text="Nuevo" onAction="#nuevo" styleClass="boton-secundario"/>
+                                <Button text="Guardar" onAction="#guardar" styleClass="boton-primario"/>
+                                <Button text="Actualizar" onAction="#actualizar" styleClass="boton-primario"/>
+                                <Button text="Eliminar" onAction="#eliminar" styleClass="boton-peligro"/>
+                            </FlowPane>
+
+                            <Separator/>
+                            <Label text="Demostración de patrones" styleClass="seccion"/>
+                            <Button text="Construir ejemplo con Builder" onAction="#demostrarBuilder"
+                                    maxWidth="Infinity" styleClass="boton-patron"/>
+                            <Label text="Prototype toma el dron seleccionado en la tabla; si no hay selección, usa el formulario."
+                                   wrapText="true" styleClass="ayuda"/>
+                            <TextField fx:id="txtClavePrototipo" promptText="Clave, ej. dron-termico"/>
+                            <HBox spacing="8">
+                                <Button text="Registrar prototipo" onAction="#registrarPrototipo"
+                                        HBox.hgrow="ALWAYS" maxWidth="Infinity" styleClass="boton-patron"/>
+                                <Button text="Clonar" onAction="#clonarPrototipo"
+                                        HBox.hgrow="ALWAYS" maxWidth="Infinity" styleClass="boton-patron"/>
+                            </HBox>
+                        </VBox>
+                    </content>
+                </ScrollPane>
+
+                <VBox spacing="10" styleClass="panel-tabla">
+                    <padding><Insets top="18" right="20" bottom="18" left="20"/></padding>
+                    <Label text="Drones almacenados" styleClass="seccion"/>
+                    <TableView fx:id="tablaDrones" VBox.vgrow="ALWAYS">
+                        <columns>
+                            <TableColumn fx:id="colId" text="ID" prefWidth="155"/>
+                            <TableColumn fx:id="colSerial" text="Serial" prefWidth="100"/>
+                            <TableColumn fx:id="colTipo" text="Tipo" prefWidth="95"/>
+                            <TableColumn fx:id="colModelo" text="Modelo" prefWidth="125"/>
+                            <TableColumn fx:id="colFabricante" text="Fabricante" prefWidth="110"/>
+                            <TableColumn fx:id="colPeso" text="Peso" prefWidth="65"/>
+                            <TableColumn fx:id="colCaracteristica" text="Característica" prefWidth="110"/>
+                        </columns>
+                        <placeholder><Label text="No hay drones para mostrar"/></placeholder>
+                    </TableView>
+                </VBox>
+            </items>
+        </SplitPane>
+    </center>
+
+    <bottom>
+        <HBox styleClass="barra-estado">
+            <padding><Insets top="9" right="18" bottom="9" left="18"/></padding>
+            <Label fx:id="lblEstado" text="Listo"/>
+        </HBox>
+    </bottom>
+</BorderPane>
