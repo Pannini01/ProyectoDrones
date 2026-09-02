@@ -14,7 +14,7 @@ import javafx.stage.Stage;
  * <p>Carga la vista FXML, aplica la hoja de estilos y crea la ventana
  * principal. Cualquier error de carga se comunica mediante una alerta.</p>
  *
- * @author Proyecto Drones
+ * @author Juan Sebastian Almonacid
  * @version 1.0
  * @since 1.0
  */
