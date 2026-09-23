@@ -1,0 +1,83 @@
+.root {
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-size: 13px;
+    -fx-background-color: #f4f7fb;
+}
+
+.encabezado {
+    -fx-background-color: linear-gradient(to right, #12345b, #21618c);
+}
+
+.titulo {
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+.subtitulo {
+    -fx-font-size: 13px;
+    -fx-text-fill: #d8eafa;
+}
+
+.panel-formulario, .panel-tabla {
+    -fx-background-color: white;
+}
+
+.seccion {
+    -fx-font-size: 17px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #17375e;
+}
+
+.text-field, .combo-box {
+    -fx-background-radius: 5px;
+    -fx-border-radius: 5px;
+    -fx-border-color: #cbd5e1;
+    -fx-background-color: white;
+}
+
+.button {
+    -fx-cursor: hand;
+    -fx-background-radius: 5px;
+    -fx-padding: 8px 13px;
+    -fx-font-weight: bold;
+}
+
+.boton-primario {
+    -fx-background-color: #21618c;
+    -fx-text-fill: white;
+}
+
+.boton-secundario {
+    -fx-background-color: #e7eef6;
+    -fx-text-fill: #17375e;
+}
+
+.boton-peligro {
+    -fx-background-color: #b03a2e;
+    -fx-text-fill: white;
+}
+
+.boton-patron {
+    -fx-background-color: #6c4aa1;
+    -fx-text-fill: white;
+}
+
+.ayuda {
+    -fx-text-fill: #667085;
+    -fx-font-size: 12px;
+}
+
+.table-view {
+    -fx-border-color: #dbe3ec;
+    -fx-border-radius: 6px;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #eaf1f8;
+}
+
+.barra-estado {
+    -fx-background-color: #e8edf3;
+    -fx-border-color: #d5dde7 transparent transparent transparent;
+}

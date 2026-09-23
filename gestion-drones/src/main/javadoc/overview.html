@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Gestión de Drones</title>
+</head>
+<body>
+<h1>API de Gestión de Drones</h1>
+<p>
+    Aplicación académica de escritorio construida con Java 17, JavaFX, FXML,
+    Maven y PostgreSQL. Permite crear, consultar, actualizar y eliminar drones
+    agrícolas o de vigilancia y demostrar patrones de diseño.
+</p>
+<h2>Arquitectura</h2>
+<ul>
+    <li><strong>modelo:</strong> entidades y jerarquía de drones. Se mantiene sin modificaciones para los nuevos patrones.</li>
+    <li><strong>servicios:</strong> Builder, Prototype, Factory Method, Singleton, Bridge, Decorator, Composite y Adapter.</li>
+    <li><strong>dao:</strong> contrato CRUD genérico y persistencia JDBC.</li>
+    <li><strong>controlador:</strong> interacción entre la vista y la lógica.</li>
+    <li><strong>excepciones:</strong> errores controlados mostrados en JavaFX.</li>
+</ul>
+
+<h2>Prototype</h2>
+<p>
+    Prototype se encuentra completamente en el paquete servicios mediante
+    Prototipo. El servicio crea una nueva instancia del mismo subtipo del dron
+    origen, copia profundamente piloto y sensores, no utiliza Cloneable y no
+    requiere PrototypeRegistry ni registro previo.
+</p>
+
+<h2>Bridge y Decorator</h2>
+<p>
+    Bridge utiliza ControlDron como abstracción y ModoControl como implementador
+    abstracto con exactamente dos subclases: ControlManual y ControlAutonomo.
+    El modo seleccionado se persiste en PostgreSQL mediante la columna
+    modo_control. Decorator utiliza DescripcionDron como componente abstracto
+    con exactamente dos subclases: DronDescripcionBase y
+    BateriaAdicionalDecorator; la selección de batería adicional también se
+    persiste sin modificar Dron.
+</p>
+
+<h2>Composite</h2>
+<p>
+    Composite modela una jerarquía de sensores mediante ComponenteSensor,
+    SensorCompuesto y SensorHoja. La aplicación construye la estructura Sensor
+    General solicitada por la actividad y la muestra desde un botón de JavaFX.
+    La misma jerarquía se registra en PostgreSQL mediante sensor_composite como
+    evidencia persistida.
+</p>
+
+<h2>Adapter</h2>
+<p>
+    Adapter transforma una instancia de Mision a JSON sin modificar la entidad.
+    ExportadorMision define el contrato objetivo, MisionJsonAdapter realiza la
+    adaptación y ArchivoJson escribe el archivo en la carpeta exports.
+</p>
+</body>
+</html>
