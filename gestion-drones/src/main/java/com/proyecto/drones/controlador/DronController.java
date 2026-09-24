@@ -24,6 +24,7 @@ import com.proyecto.drones.servicios.DronDescripcionBase;
 import com.proyecto.drones.servicios.MisionJsonAdapter;
 import com.proyecto.drones.servicios.ModoControl;
 import com.proyecto.drones.servicios.Prototipo;
+import com.proyecto.drones.servicios.SistemaDronesFacade;
 import com.proyecto.drones.servicios.DronBuilder.AgriculturaBuilder;
 import com.proyecto.drones.servicios.DronBuilder.VigilanciaBuilder;
 
@@ -100,6 +101,8 @@ public class DronController {
 
     /** DAO de drones. Persiste CRUD, Decorator y modo Bridge. */
     private final DronDAO dronDAO = new DronDAO();
+    /** Fachada que simplifica la coordinacion de varios patrones existentes. */
+    private final SistemaDronesFacade facade = new SistemaDronesFacade();
     /** Colección observable que alimenta la tabla. */
     private final ObservableList<Dron> datos = FXCollections.observableArrayList();
     /** Modo Bridge asociado al formulario o al dron seleccionado. */
@@ -444,6 +447,27 @@ public class DronController {
             mostrarError("No fue posible crear el archivo JSON: " + e.getMessage());
         } catch (RuntimeException e) {
             mostrarError("Ocurrio un error inesperado durante la demostracion de Adapter.");
+        }
+    }
+    /**
+     * Demuestra Facade mediante una sola llamada que coordina Decorator, Bridge
+     * y Composite para el dron seleccionado o diligenciado en el formulario.
+     */
+    @FXML
+    private void demostrarFacade() {
+        try {
+            Dron dron = obtenerDronParaDemostracion();
+            String resumen = facade.generarResumenOperativo(
+                    dron,
+                    chkBateriaAdicional.isSelected(),
+                    modoControlFormulario);
+            lblEstado.setText("Facade simplifico la coordinacion de varios subsistemas para "
+                    + dron.getSerial() + ".");
+            mostrarTextoLargo("Patron Facade - resumen operativo", resumen);
+        } catch (AplicacionException e) {
+            mostrarError(e.getMessage());
+        } catch (RuntimeException e) {
+            mostrarError("Ocurrio un error inesperado durante la demostracion de Facade.");
         }
     }
 

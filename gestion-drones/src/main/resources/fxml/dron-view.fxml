@@ -97,6 +97,12 @@
                                    wrapText="true" styleClass="ayuda"/>
                             <Button text="Exportar misión a JSON" onAction="#demostrarAdapter"
                                     maxWidth="Infinity" styleClass="boton-patron"/>
+                            <Separator/>
+                            <Label text="Facade - acceso simplificado" styleClass="seccion"/>
+                            <Label text="Una sola operación coordina Decorator, Bridge y Composite sin que el controlador tenga que ejecutar cada subsistema por separado."
+                                   wrapText="true" styleClass="ayuda"/>
+                            <Button text="Demostrar Facade" onAction="#demostrarFacade"
+                                    maxWidth="Infinity" styleClass="boton-patron"/>
                         </VBox>
                     </content>
                 </ScrollPane>
