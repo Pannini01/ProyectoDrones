@@ -54,8 +54,10 @@
                                 <Button text="Nuevo" onAction="#nuevo" styleClass="boton-secundario"/>
                                 <Button text="Guardar" onAction="#guardar" styleClass="boton-primario"/>
                                 <Button text="Actualizar" onAction="#actualizar" styleClass="boton-primario"/>
-                                <Button text="Eliminar" onAction="#eliminar" styleClass="boton-peligro"/>
+                                <Button text="Eliminar (Proxy)" onAction="#eliminar" styleClass="boton-peligro"/>
                             </FlowPane>
+                            <Label text="Proxy protege únicamente la eliminación. Al eliminar un dron solicita la contraseña configurada en DELETE_PASSWORD dentro de .env."
+                                   wrapText="true" styleClass="ayuda"/>
 
                             <Separator/>
                             <Label text="Demostración de patrones" styleClass="seccion"/>

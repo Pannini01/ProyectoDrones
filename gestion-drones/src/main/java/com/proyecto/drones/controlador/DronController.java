@@ -21,6 +21,7 @@ import com.proyecto.drones.servicios.CompositeSensores;
 import com.proyecto.drones.servicios.ControlDron;
 import com.proyecto.drones.servicios.DescripcionDron;
 import com.proyecto.drones.servicios.DronDescripcionBase;
+import com.proyecto.drones.servicios.DronCrudProxy;
 import com.proyecto.drones.servicios.MisionJsonAdapter;
 import com.proyecto.drones.servicios.ModoControl;
 import com.proyecto.drones.servicios.Prototipo;
@@ -32,10 +33,13 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
@@ -98,8 +102,8 @@ public class DronController {
     /** Texto de estado mostrado al pie de la ventana. */
     @FXML private Label lblEstado;
 
-    /** DAO de drones. Persiste CRUD, Decorator y modo Bridge. */
-    private final DronDAO dronDAO = new DronDAO();
+    /** Proxy del CRUD; delega al DAO y protege especificamente la eliminacion. */
+    private final DronCrudProxy dronCrud = new DronCrudProxy(new DronDAO());
     /** Colección observable que alimenta la tabla. */
     private final ObservableList<Dron> datos = FXCollections.observableArrayList();
     /** Modo Bridge asociado al formulario o al dron seleccionado. */
@@ -157,7 +161,7 @@ public class DronController {
             boolean bateriaAdicional = chkBateriaAdicional.isSelected();
             String codigoModo = modoControlFormulario.getCodigo();
             String nombreModo = modoControlFormulario.getNombre();
-            dronDAO.crear(dron, bateriaAdicional, codigoModo);
+            dronCrud.crear(dron, bateriaAdicional, codigoModo);
 
             String descripcion = crearDescripcionDecorada(dron, bateriaAdicional).getDescripcion();
             cargarDatos();
@@ -181,7 +185,7 @@ public class DronController {
             boolean bateriaAdicional = chkBateriaAdicional.isSelected();
             String codigoModo = modoControlFormulario.getCodigo();
             String nombreModo = modoControlFormulario.getNombre();
-            if (!dronDAO.actualizar(dron, bateriaAdicional, codigoModo)) {
+            if (!dronCrud.actualizar(dron, bateriaAdicional, codigoModo)) {
                 throw new ValidacionException("El dron que intenta actualizar ya no existe.");
             }
             cargarDatos();
@@ -197,7 +201,10 @@ public class DronController {
         }
     }
 
-    /** Solicita confirmación y elimina el dron seleccionado. */
+    /**
+     * Solicita confirmacion y demuestra Proxy protegiendo la eliminacion con
+     * una contrasena. Ninguna otra operacion CRUD solicita credenciales.
+     */
     @FXML
     private void eliminar() {
         Dron seleccionado = tablaDrones.getSelectionModel().getSelectedItem();
@@ -208,18 +215,27 @@ public class DronController {
         Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
         confirmacion.setTitle("Confirmar eliminacion");
         confirmacion.setHeaderText("Eliminar dron " + seleccionado.getSerial());
-        confirmacion.setContentText("Esta operacion eliminara el registro de PostgreSQL.");
+        confirmacion.setContentText(
+                "Proxy protege esta operacion. Despues de confirmar se solicitara la contrasena.");
         Optional<ButtonType> respuesta = confirmacion.showAndWait();
         if (respuesta.isEmpty() || respuesta.get() != ButtonType.OK) {
             return;
         }
+
+        Optional<String> contrasena = solicitarContrasenaEliminacion();
+        if (contrasena.isEmpty()) {
+            lblEstado.setText("Eliminacion cancelada antes de autorizar el Proxy.");
+            return;
+        }
+
         try {
-            if (!dronDAO.eliminar(seleccionado.getId())) {
+            if (!dronCrud.eliminarProtegido(seleccionado.getId(), contrasena.get())) {
                 throw new ValidacionException("El dron seleccionado ya no existe.");
             }
             cargarDatos();
             nuevo();
-            mostrarInfo("Dron eliminado", "El registro fue eliminado correctamente.");
+            mostrarInfo("Proxy - dron eliminado",
+                    "La contrasena fue validada por el Proxy y el DAO elimino el registro.");
         } catch (AplicacionException e) {
             mostrarError(e.getMessage());
         } catch (RuntimeException e) {
@@ -232,7 +248,7 @@ public class DronController {
     private void buscar() {
         try {
             String id = obligatorio(txtId.getText(), "Digite el ID que desea buscar.");
-            Optional<Dron> encontrado = dronDAO.buscarPorId(id);
+            Optional<Dron> encontrado = dronCrud.buscarPorId(id);
             if (encontrado.isEmpty()) {
                 throw new ValidacionException("No se encontro un dron con ese ID.");
             }
@@ -344,7 +360,7 @@ public class DronController {
 
             String persistencia;
             if (seleccionado != null) {
-                if (!dronDAO.actualizarModoControl(seleccionado.getId(), modoControl.getCodigo())) {
+                if (!dronCrud.actualizarModoControl(seleccionado.getId(), modoControl.getCodigo())) {
                     throw new ValidacionException("El dron seleccionado ya no existe.");
                 }
                 modoControlFormulario = modoControl;
@@ -384,7 +400,7 @@ public class DronController {
 
         try {
             if (seleccionado != null) {
-                if (!dronDAO.actualizarBateriaAdicional(seleccionado.getId(), incluirBateria)) {
+                if (!dronCrud.actualizarBateriaAdicional(seleccionado.getId(), incluirBateria)) {
                     throw new ValidacionException("El dron seleccionado ya no existe.");
                 }
 
@@ -535,7 +551,7 @@ public class DronController {
     /** Carga desde PostgreSQL la lista observable de la tabla. */
     private void cargarDatos() {
         try {
-            datos.setAll(dronDAO.listar());
+            datos.setAll(dronCrud.listar());
             lblEstado.setText(datos.size() + " dron(es) cargado(s) desde PostgreSQL.");
         } catch (AplicacionException e) {
             datos.clear();
@@ -565,9 +581,9 @@ public class DronController {
         }
 
         try {
-            chkBateriaAdicional.setSelected(dronDAO.tieneBateriaAdicional(dron.getId()));
+            chkBateriaAdicional.setSelected(dronCrud.tieneBateriaAdicional(dron.getId()));
             modoControlFormulario = ModoControl.desdeCodigo(
-                    dronDAO.obtenerModoControl(dron.getId()));
+                    dronCrud.obtenerModoControl(dron.getId()));
         } catch (AplicacionException | IllegalArgumentException e) {
             chkBateriaAdicional.setSelected(false);
             modoControlFormulario = new ModoControl.ControlManual();
@@ -637,6 +653,27 @@ public class DronController {
         } catch (NumberFormatException e) {
             throw new ValidacionException("El campo " + nombre + " debe contener un numero valido.");
         }
+    }
+    /**
+     * Solicita de forma enmascarada la contrasena usada exclusivamente por el
+     * Proxy al eliminar un dron.
+     *
+     * @return contrasena digitada o vacio si el usuario cancela
+     */
+    private Optional<String> solicitarContrasenaEliminacion() {
+        Dialog<String> dialogo = new Dialog<>();
+        dialogo.setTitle("Proxy - autorizacion de eliminacion");
+        dialogo.setHeaderText("Ingrese la contrasena para permitir la eliminacion del dron.");
+
+        ButtonType botonEliminar = new ButtonType("Autorizar eliminacion", ButtonBar.ButtonData.OK_DONE);
+        dialogo.getDialogPane().getButtonTypes().addAll(botonEliminar, ButtonType.CANCEL);
+
+        PasswordField campo = new PasswordField();
+        campo.setPromptText("Contrasena de eliminacion");
+        campo.setPrefColumnCount(24);
+        dialogo.getDialogPane().setContent(campo);
+        dialogo.setResultConverter(boton -> boton == botonEliminar ? campo.getText() : null);
+        return dialogo.showAndWait();
     }
 
     /**
